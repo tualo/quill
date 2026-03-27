@@ -18,12 +18,15 @@ class Route extends \Tualo\Office\Basic\RouteWrapper
                 if ($path_parts['extension'] == 'js') {
                     TualoApplication::contenttype('application/javascript');
                     TualoApplication::etagFile((dirname(__DIR__, 2) . '/src/js/' . $matches['file'] . ''));
-                } else if ($path_parts['extension'] == 'css') {
+                }
+            } else if (file_exists(dirname(__DIR__, 2) . '/src/css/' . $matches['file'] . '')) {
+                $path_parts = pathinfo(dirname(__DIR__, 2) . '/src/css/' . $matches['file'] . '');
+                if ($path_parts['extension'] == 'css') {
                     TualoApplication::contenttype('text/css');
                     TualoApplication::etagFile((dirname(__DIR__, 2) . '/src/css/' . $matches['file'] . ''));
                 }
             } else {
-                TualoApplication::body("// hm, something is wrong " . $matches['file']);
+                TualoApplication::body("// hm, something is wrong " . $matches['file'] . ' xxx ' . dirname(__DIR__, 2) . ' yyy ' .  (dirname(__DIR__, 2) . '/src/css/' . $matches['file'] . ''));
             }
         }, array('get', 'post'), false);
     }

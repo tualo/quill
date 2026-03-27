@@ -6,9 +6,10 @@ Ext.define('Tualo.quill.form.field.Editor', {
     height: 300,
 
     fieldSubTpl: [ // note: {id} here is really {inputId}, but {cmpId} is available 
-        '<textarea id="{id}" data-ref="inputEl" type="{type}" {inputAttrTpl}',
+        '<input id="{id}" data-ref="inputEl" type="hidden" {inputAttrTpl}',
         ' size="1"', // allows inputs to fully respect CSS widths across all browsers 
         '<tpl if="name"> name="{name}"</tpl>',
+        '<tpl if="value"> value="{value}"</tpl>',
         '<tpl if="placeholder"> placeholder="{placeholder}"</tpl>',
         '{%if (values.maxLength !== undefined){%} maxlength="{maxLength}"{%}%}',
         '<tpl if="readOnly"> readonly="readonly"</tpl>',
@@ -17,8 +18,11 @@ Ext.define('Tualo.quill.form.field.Editor', {
         '<tpl if="fieldStyle"> style="{fieldStyle}"</tpl>',
         '<tpl foreach="inputElAriaAttributes"> {$}="{.}"</tpl>',
         ' class="{fieldCls} {typeCls} {typeCls}-{ui} {editableCls} {inputCls}" autocomplete="off"/>',
-        '<tpl if="value">{[Ext.util.Format.htmlEncode(values.value)]}"</tpl>',
-        '</textarea>',
+        '<div id="{id}-quilleditor"  data-ref="inputEl" rows="1" {inputAttrTpl} style="background-color: white;">',
+        '<tpl if="value">{[values.value]}</tpl>',
+        '<div id="{id}-quilleditor-toolbar"></div>',
+        '</div>'
+        ,
         {
             disableFormats: true
         }
@@ -42,53 +46,6 @@ Ext.define('Tualo.quill.form.field.Editor', {
         }
     },
 
-    /*
-    createEditor: function () {
-        let o = {
-            width: this.getWidth() - this.labelWidth - 17,
-            height: this.getHeight() - 2
-        };
-
-        if (typeof this.monacoeditor == 'undefined') {
-            document.getElementById(this.id + '-inputEl').style.display = 'none';
-
-
-
-            this.monacoeditor = monaco.editor.create(document.getElementById(this.id + '-inputEl').parentNode, {
-                language: this.language,
-                automaticLayout: true,
-                //roundedSelection: false,
-                scrollBeyondLastLine: true,
-                readOnly: false,
-                theme: "vs",
-                value: this._value,
-                fontSize: 10,
-                useShadows: true,
-
-                // Render vertical arrows. Defaults to false.
-                verticalHasArrows: true,
-                // Render horizontal arrows. Defaults to false.
-                horizontalHasArrows: true,
-
-                // Render vertical scrollbar.
-                // Accepted values: 'auto', 'visible', 'hidden'.
-                // Defaults to 'auto'
-                vertical: 'visible',
-                // Render horizontal scrollbar.
-                // Accepted values: 'auto', 'visible', 'hidden'.
-                // Defaults to 'auto'
-                horizontal: 'visible',
-                verticalScrollbarSize: 17,
-                horizontalScrollbarSize: 17,
-                arrowSize: 30
-            });
-            this.monacoeditor.layout(o);
-
-            this.up().on('resize', this.resizeMonacoEditor, this);
-            this.monacoeditor.getModel().onDidChangeContent(this.onDidChangeContent.bind(this));
-        }
-    },
-    */
     intern: false,
     createEditor: function (config) {
         var me = this,
@@ -106,7 +63,7 @@ Ext.define('Tualo.quill.form.field.Editor', {
             ['blockquote', 'code-block'],
             [{ 'list': 'ordered' }, { 'list': 'bullet' }],
             [{ 'align': [] }],
-            ['omega']
+            ['more']
         ];
 
         editor = new Quill('#' + this.id + '-inputEl-quilleditor', {
@@ -122,7 +79,7 @@ Ext.define('Tualo.quill.form.field.Editor', {
         });
 
         try {
-            var customButton = document.querySelectorAll('.ql-omega');
+            var customButton = document.querySelectorAll('.ql-more');
             customButton = customButton[customButton.length - 1];
             customButton.addEventListener('click', this.initContextMenu.bind(this));
         } catch (E) { }
@@ -138,6 +95,41 @@ Ext.define('Tualo.quill.form.field.Editor', {
         });
         editor.on('selection-change', function (range, oldRange, source) { me.fireEvent('selection-change', me, range, oldRange, source); });
         return editor;
+    },
+    initContextMenu: function (e) {
+
+
+        var contextMenu = new Ext.menu.Menu({ items: [], width: 600, scrollable: 'y' });
+
+        Tualo.Ajax.request({
+            url: './ds/texttemplate/read',
+            params: {
+                filter: JSON.stringify([{
+                    operator: 'eq',
+                    property: 'texttemplate__klasse',
+                    value: this.templateid
+                }])
+            },
+            scope: this,
+            json: function (o) {
+                if (o.success) {
+
+                    o.data.forEach(element => {
+
+                        contextMenu.add({
+                            text: element.texttemplate__text.substring(0, 70) + '...',
+                            fulltext: element.texttemplate__text,
+                            scope: this,
+                            handler: this.onItemClick
+                        })
+
+                    });
+                    var xy = [e.x, e.y];
+                    contextMenu.showAt(xy);
+                }
+            }
+        });
+
     },
     onDestroy: function () {
         // this.monacoeditor.dispose();
