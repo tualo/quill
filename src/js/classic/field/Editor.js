@@ -137,7 +137,11 @@ Ext.define('Tualo.quill.form.field.Editor', {
     },
     getSubmitValue: function () {
         var me = this;
-        return me.editor.getHtml();
+        console.log('getSubmitValue', me);
+        if (me.editor) {
+            return me.editor.getHtml();
+        }
+        return me.callParent();
     },
 
     setValue: function (v) {
@@ -149,6 +153,7 @@ Ext.define('Tualo.quill.form.field.Editor', {
 
         me.callParent([v]);
         me.lastchange = t;
+        console.log('setValue', v);
 
         if (me.intern !== true) {
             if (me.editor) {
