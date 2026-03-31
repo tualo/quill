@@ -157,12 +157,12 @@ Ext.define('Tualo.quill.form.field.Editor', {
 
         if (me.intern !== true) {
             if (me.editor) {
-                me.editor.dangerouslyPasteHTML(v, 'silent');
+                me.editor.clipboard.dangerouslyPasteHTML(v, 'silent');
                 // me.editor.setContents(me.editor.clipboard.convert(v), 'silent');
             } else {
                 me.on('editorReady', function () {
                     if (me.editor.getHtml() != me.editor.clipboard.convert(v))
-                        me.editor.dangerouslyPasteHTML(v, 'silent');
+                        me.editor.clipboard.dangerouslyPasteHTML(v, 'silent');
                     // me.editor.setContents(me.editor.clipboard.convert(v), 'silent');
                 }, this, { single: true });
             }
