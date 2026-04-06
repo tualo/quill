@@ -81,6 +81,7 @@ Ext.define('Tualo.quill.form.field.Editor', {
         try {
             var customButton = document.querySelectorAll('.ql-more');
             customButton = customButton[customButton.length - 1];
+            customButton.innerHTML = 'TXT';
             customButton.addEventListener('click', this.initContextMenu.bind(this));
         } catch (E) { }
 
@@ -106,7 +107,7 @@ Ext.define('Tualo.quill.form.field.Editor', {
             params: {
                 filter: JSON.stringify([{
                     operator: 'eq',
-                    property: 'texttemplate__klasse',
+                    property: 'klasse',
                     value: this.templateid
                 }])
             },
@@ -117,8 +118,8 @@ Ext.define('Tualo.quill.form.field.Editor', {
                     o.data.forEach(element => {
 
                         contextMenu.add({
-                            text: element.texttemplate__text.substring(0, 70) + '...',
-                            fulltext: element.texttemplate__text,
+                            text: element.text.substring(0, 70) + '...',
+                            fulltext: element.text,
                             scope: this,
                             handler: this.onItemClick
                         })
@@ -130,6 +131,10 @@ Ext.define('Tualo.quill.form.field.Editor', {
             }
         });
 
+    },
+    onItemClick: function (e) {
+
+        this.setValue(this.getValue() + "<br/>" + e.fulltext);
     },
     onDestroy: function () {
         // this.monacoeditor.dispose();
@@ -148,9 +153,10 @@ Ext.define('Tualo.quill.form.field.Editor', {
         var me = this,
             t = (new Date()).getTime();
 
-        if (typeof me.lastchange == 'undefined') me.lastchange = (new Date()).getTime() - 1000;
-        if (t - me.lastchange < 100) return;
-
+        /*
+                if (typeof me.lastchange == 'undefined') me.lastchange = (new Date()).getTime() - 1000;
+                if (t - me.lastchange < 100) return;
+        */
         me.callParent([v]);
         me.lastchange = t;
         console.log('setValue', v);
