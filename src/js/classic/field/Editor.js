@@ -105,6 +105,7 @@ Ext.define('Tualo.quill.form.field.Editor', {
         Tualo.Ajax.request({
             url: './ds/texttemplate/read',
             params: {
+                limit: 1000,
                 filter: JSON.stringify([{
                     operator: 'eq',
                     property: 'klasse',
@@ -161,6 +162,7 @@ Ext.define('Tualo.quill.form.field.Editor', {
         me.lastchange = t;
         console.log('setValue', v);
 
+        if (v == null) v = '';
         if (me.intern !== true) {
             if (me.editor) {
                 me.editor.clipboard.dangerouslyPasteHTML(v, 'silent');
